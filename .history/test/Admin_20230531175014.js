@@ -94,16 +94,17 @@ describe("TestAdmin", () => {
       const prevOwnerBalance = await this.stableToken.balanceOf(owner.address);
       const prevAddr1Balance = await this.stableToken.balanceOf(addr1.address);
 
-      await expect(this.admin.frontPayout(0, 20, 100000))
+      const tx = await this.admin.frontPayout(0, 20, 100000);
+
+      const newOwnerBalance = await this.stableToken.balanceOf(owner.address);
+      const newAddr1Balance = await this.stableToken.balanceOf(addr1.address);
+
+      expect(tx)
         .to.emit(this.admin, "PayoutSent")
         .withArgs(0, addr1.address, 100000, true, 20, 20, "");
 
-      expect(await this.stableToken.balanceOf(owner.address)).to.equal(
-        prevOwnerBalance - 20
-      );
-      expect(await this.stableToken.balanceOf(addr1.address)).to.equal(
-        prevAddr1Balance + 20
-      );
+      expect(newOwnerBalance.sub(prevOwnerBalance)).to.equal(- 20);
+      expect(prevAddr1Balance.sub(newAddr1Balance)).to.equal(+ 20);
     });
 
     it("should revert if payout exceeds the budget", async function () {
