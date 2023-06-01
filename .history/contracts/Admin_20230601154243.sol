@@ -1,5 +1,7 @@
+
 // SPDX-License-Identifier: MIT Licensed
 pragma solidity ^0.8.16;
+
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -7,11 +9,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract Admin is
-    Initializable,
-    OwnableUpgradeable,
-    ReentrancyGuardUpgradeable
-{
+contract Admin is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     struct Commit {
@@ -48,10 +46,7 @@ contract Admin is
         __Ownable_init();
         __ReentrancyGuard_init();
 
-        require(
-            stableTokenAddress != address(0),
-            "Zero address for stabletoken"
-        );
+        require(stableTokenAddress != address(0), "Zero address for stabletoken");
         _stableToken = IERC20Upgradeable(stableTokenAddress);
     }
 
@@ -83,10 +78,7 @@ contract Admin is
         uint256 payoutAmount,
         uint256 timestamp
     ) external nonReentrant {
-        require(
-            _commits[commitId].owner != address(0),
-            "No commits exist for that id"
-        );
+        require(_commits[commitId].owner != address(0), "No commits exist for that id");
 
         Commit storage commit = _commits[commitId];
         require(commit.spent <= commit.budget, "Budget has been fully spent");
@@ -117,10 +109,7 @@ contract Admin is
         string calldata payoutMetadata,
         uint256 timestamp
     ) external nonReentrant {
-        require(
-            _commits[commitId].owner != address(0),
-            "No commits exist for that id"
-        );
+        require(_commits[commitId].owner != address(0), "No commits exist for that id");
 
         Commit storage commit = _commits[commitId];
         require(commit.spent <= commit.budget, "Budget has been fully spent");
@@ -129,11 +118,6 @@ contract Admin is
         require(commit.spent <= commit.budget, "Payout will exceed the budget");
 
         commit.balance += payoutAmount;
-
-        require(
-            _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
-            "Transfer failed"
-        );
 
         emit PayoutSent(
             commitId,
