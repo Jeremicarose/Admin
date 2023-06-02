@@ -5,8 +5,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
-
-
+require("@sourcify/hardhat-sourcify");
 
 
 
@@ -23,8 +22,5 @@ module.exports = {
       url: CELO_RPC_URL,
       accounts: []
     },
-  },
-  gasReporter: {
-    currency: "USD",
   }
 }

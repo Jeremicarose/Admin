@@ -9,7 +9,6 @@ require("hardhat-gas-reporter");
 
 
 
-
 const CELO_RPC_URL = process.env.CELO_RPC_URL;
 
 module.exports = {
