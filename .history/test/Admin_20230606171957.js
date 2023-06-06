@@ -93,20 +93,16 @@ describe("TestAdmin", () => {
 
       const prevOwnerBalance = await this.stableToken.balanceOf(owner.address);
       const prevAddr1Balance = await this.stableToken.balanceOf(addr1.address);
-      const prevUserBalance = await this.admin.getUserBalance(addr1.address);
 
       await expect(this.admin.frontPayout(0, 20, 100000))
         .to.emit(this.admin, "PayoutSent")
-        .withArgs(0, addr1.address, 100000, true, 20, "");
+        .withArgs(0, addr1.address, 100000, true, 20, 20, "");
 
       expect(await this.stableToken.balanceOf(owner.address)).to.equal(
         prevOwnerBalance - 20
       );
       expect(await this.stableToken.balanceOf(addr1.address)).to.equal(
         prevAddr1Balance + 20
-      );
-      expect(await this.admin.getUserBalance(addr1.address)).to.equal(
-        prevUserBalance + 20
       );
     });
 
@@ -121,11 +117,11 @@ describe("TestAdmin", () => {
 
     it("should revert if the budget has been fully spent", async function () {
       const [owner, addr1] = await ethers.getSigners();
-
+    
       await this.stableToken.increaseAllowance(this.admin.address, 1500);
-      await this.admin.frontPayout(0, 1000, 100000);
-
-      await expect(this.admin.frontPayout(0, 500, 100000))
+      await this.admin.approvePayout(0, 1000, "", 100000);
+    
+      await expect(this.admin.approvePayout(0, 500, "", 100000))
         .to.be.revertedWith("Budget has been fully spent");
     });
   });
@@ -135,58 +131,55 @@ describe("TestAdmin", () => {
       const [owner, addr1] = await ethers.getSigners();
       await this.admin.commitTree(addr1.address, 100, 1500, 100000);
     });
-
+  
     it("should revert if commitId does not exist", async function () {
       await expect(this.admin.approvePayout(12, 20, "", 100000))
         .to.be.revertedWith("No commits exist for that id");
     });
-
+  
     it("should revert if allowance is not increased", async function () {
       await expect(this.admin.approvePayout(0, 20, "", 100000))
         .to.be.revertedWith("ERC20: insufficient allowance");
     });
-
+  
     it("should transfer tokens and emit PayoutSent event on successful payout", async function () {
       const [owner, addr1] = await ethers.getSigners();
-
+  
       await this.stableToken.increaseAllowance(this.admin.address, 20);
-
+  
       const prevOwnerBalance = await this.stableToken.balanceOf(owner.address);
       const prevAddr1Balance = await this.stableToken.balanceOf(addr1.address);
-      const prevUserBalance = await this.admin.getUserBalance(addr1.address);
-
+  
       await expect(this.admin.approvePayout(0, 20, "", 100000))
         .to.emit(this.admin, "PayoutSent")
-        .withArgs(0, addr1.address, 100000, false, 20, "");
-
+        .withArgs(0, addr1.address, 100000, false, 20, 20, "");
+  
       expect(await this.stableToken.balanceOf(owner.address)).to.equal(
         prevOwnerBalance - 20
       );
       expect(await this.stableToken.balanceOf(addr1.address)).to.equal(
         prevAddr1Balance + 20
       );
-      expect(await this.admin.getUserBalance(addr1.address)).to.equal(
-        prevUserBalance + 20
-      );
     });
-
+  
     it("should revert if payout exceeds the budget", async function () {
       const [owner, addr1] = await ethers.getSigners();
-
+  
       await this.stableToken.increaseAllowance(this.admin.address, 2000);
-
+  
       await expect(this.admin.approvePayout(0, 2000, "", 100000))
         .to.be.revertedWith("Payout will exceed the budget");
     });
-
+  
     it("should revert if the budget has been fully spent", async function () {
       const [owner, addr1] = await ethers.getSigners();
-
+    
       await this.stableToken.increaseAllowance(this.admin.address, 1500);
-      await this.admin.frontPayout(0, 1000, 100000);
-
-      await expect(this.admin.frontPayout(0, 500, 100000))
+      await this.admin.approvePayout(0, 1000, "", 100000);
+    
+      await expect(this.admin.approvePayout(0, 500, "", 100000))
         .to.be.revertedWith("Budget has been fully spent");
     });
   });
+   
 });

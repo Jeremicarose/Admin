@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT Licensed
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -33,6 +32,7 @@ contract Admin is
         address indexed owner,
         uint256 indexed timestamp,
         bool isFronted,
+        uint256 balance,
         uint256 payoutAmount,
         string payoutMetadata
     );
@@ -41,7 +41,9 @@ contract Admin is
     uint256 private constant MAX_PERCENTAGE = 10000;
     CountersUpgradeable.Counter private _commitIdTracker;
     mapping(uint256 => Commit) private _commits;
-    mapping(address => uint256) private _userBalances;
+
+    mapping(address => uint256) public userBalances;
+    mapping(address => mapping(uint256 => uint256)) public userCommitBalances;
 
     function initialize(address stableTokenAddress) external initializer {
         __Ownable_init();
@@ -92,8 +94,9 @@ contract Admin is
         commit.spent += payoutAmount;
         require(commit.spent <= commit.budget, "Payout will exceed the budget");
 
-        _userBalances[commit.owner] += payoutAmount;
-
+        commit.balance += payoutAmount;
+        userBalances[commit.owner] += payoutAmount;
+        userCommitBalances[commit.owner][commitId] += payoutAmount;
         require(
             _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
             "Transfer failed"
@@ -104,6 +107,7 @@ contract Admin is
             commit.owner,
             timestamp,
             true,
+            commit.balance,
             payoutAmount,
             ""
         );
@@ -126,8 +130,9 @@ contract Admin is
         commit.spent += payoutAmount;
         require(commit.spent <= commit.budget, "Payout will exceed the budget");
 
-        _userBalances[commit.owner] += payoutAmount;
-
+        commit.balance += payoutAmount;
+        userBalances[commit.owner] += payoutAmount;
+        userCommitBalances[commit.owner][commitId] += payoutAmount;
         require(
             _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
             "Transfer failed"
@@ -138,12 +143,9 @@ contract Admin is
             commit.owner,
             timestamp,
             false,
+            commit.balance,
             payoutAmount,
             payoutMetadata
         );
-    }
-
-    function getUserBalance(address userAddress) external view returns (uint256) {
-        return _userBalances[userAddress];
     }
 }

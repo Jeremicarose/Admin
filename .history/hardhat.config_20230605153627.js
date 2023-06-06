@@ -24,7 +24,7 @@ module.exports = {
       accounts: []
     },
   }, 
-  gasReporter: { 
+  gasReporter: {
     currency: "USD",
   }
 }

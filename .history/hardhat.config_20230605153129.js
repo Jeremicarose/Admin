@@ -23,8 +23,8 @@ module.exports = {
       url: CELO_RPC_URL,
       accounts: []
     },
-  }, 
-  gasReporter: { 
+  },
+  gasReporter: {
     currency: "USD",
   }
 }
