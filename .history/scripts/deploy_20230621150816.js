@@ -8,7 +8,10 @@ async function main() {
 
   console.log("MyContract deployed to:", myContract.address);
 
-
+  // Accessing the admin address
+  const adminContract = await MyContract.getAdmin();
+  const admin = await adminContract.address;
+  console.log("Admin address:", admin);
 }
 
 // Running the deployment script
@@ -17,4 +20,4 @@ main()
   .catch((error) => {
     console.error(error);
     process.exit(1);
-  }); 
+  });

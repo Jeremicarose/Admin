@@ -18,11 +18,10 @@ module.exports = {
     alfajores: {
       url: CELO_RPC_URL,
       accounts: {
-        mnemonic: process.env.PRIVATE_KEY,
-        path: "m/44'/52752'/0'/0"
+        mnemonic: process.env.MNEMONIC,
+        path: "m/44'/52752'/0'/0/",
+      },
     },
-    chainId: 44787
-  },
   },
   gasReporter: {
     currency: "USD",

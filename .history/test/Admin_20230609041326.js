@@ -95,26 +95,26 @@ describe("TestAdmin", () => {
       );
     });
 
-    it("should revert if payout exceeds the budget", async function () {
-      const [owner, addr1] = await ethers.getSigners();
-
-      await this.stableToken.increaseAllowance(this.admin.address, 2000);
-
-      await expect(this.admin.frontPayout(0, 2000, 100000)).to.be.revertedWith(
-        "Payout will exceed the budget"
-      );
-    });
-
-    // it("should revert if the budget has been fully spent", async function () {
+    // it("should revert if payout exceeds the budget", async function () {
     //   const [owner, addr1] = await ethers.getSigners();
 
-    //   await this.stableToken.increaseAllowance(this.admin.address, 1500);
-    //   await this.admin.frontPayout(0, 1000, 100000);
+    //   await this.stableToken.increaseAllowance(this.admin.address, 2000);
 
-    //   await expect(this.admin.frontPayout(0, 800, 100000)).to.be.revertedWith(
-    //     "Budget has been fully spent"
+    //   await expect(this.admin.frontPayout(0, 2000, 100000)).to.be.revertedWith(
+    //     "Payout will exceed the budget"
     //   );
     // });
+
+    it("should revert if the budget has been fully spent", async function () {
+      const [owner, addr1] = await ethers.getSigners();
+
+      await this.stableToken.increaseAllowance(this.admin.address, 1500);
+      await this.admin.frontPayout(0, 1000, 100000);
+
+      await expect(this.admin.frontPayout(0, 800, 100000)).to.be.revertedWith(
+        "Budget has been fully spent"
+      );
+    });
   });
 
   describe("approvePayout", function () {
@@ -159,25 +159,25 @@ describe("TestAdmin", () => {
       );
     });
 
-    it("should revert if payout exceeds the budget", async function () {
-      const [owner, addr1] = await ethers.getSigners();
-
-      await this.stableToken.increaseAllowance(this.admin.address, 2000);
-
-      await expect(
-        this.admin.approvePayout(0, 2000, "", 100000)
-      ).to.be.revertedWith("Payout will exceed the budget");
-    });
-
-    // it("should revert if the budget has been fully spent", async function () {
+    // it("should revert if payout exceeds the budget", async function () {
     //   const [owner, addr1] = await ethers.getSigners();
 
-    //   await this.stableToken.increaseAllowance(this.admin.address, 1500);
-    //   await this.admin.frontPayout(0, 1000, 100000);
+    //   await this.stableToken.increaseAllowance(this.admin.address, 2000);
 
-    //   await expect(this.admin.frontPayout(0, 500, 100000)).to.be.revertedWith(
-    //     "Budget has been fully spent"
-    //   );
+    //   await expect(
+    //     this.admin.approvePayout(0, 2000, "", 100000)
+    //   ).to.be.revertedWith("Payout will exceed the budget");
     // });
+
+    it("should revert if the budget has been fully spent", async function () {
+      const [owner, addr1] = await ethers.getSigners();
+
+      await this.stableToken.increaseAllowance(this.admin.address, 1500);
+      await this.admin.frontPayout(0, 1000, 100000);
+
+      await expect(this.admin.frontPayout(0, 500, 100000)).to.be.revertedWith(
+        "Budget has been fully spent"
+      );
+    });
   });
 });

@@ -3,12 +3,13 @@ async function main() {
   const MyContract = await ethers.getContractFactory("Admin");
   const myContract = await MyContract.deploy();
 
-  // Waiting for the contract to be deployed
   await myContract.deployed();
 
   console.log("MyContract deployed to:", myContract.address);
 
-
+  // Accessing the admin address
+  const admin = await myContract.admin();
+  console.log("Admin address:", admin);
 }
 
 // Running the deployment script
@@ -17,4 +18,4 @@ main()
   .catch((error) => {
     console.error(error);
     process.exit(1);
-  }); 
+  });
