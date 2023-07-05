@@ -7,7 +7,6 @@ require("hardhat-gas-reporter");
 
 const CELO_RPC_URL = process.env.CELO_RPC_URL;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
-//Deploy address = 0xE17C22430047B63b5051cb0B182498a8d4FBFf3a
 
 module.exports = {
   solidity: "0.8.16",
@@ -23,7 +22,7 @@ module.exports = {
         path: "m/44'/52752'/0'/0"
       },
       chainId: 44787,
-      gasPrice: 5000000000,
+      gasPrice: 4000000000,
       gas: 8000000,
     },
   },

@@ -7,7 +7,6 @@ require("hardhat-gas-reporter");
 
 const CELO_RPC_URL = process.env.CELO_RPC_URL;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
-//Deploy address = 0xE17C22430047B63b5051cb0B182498a8d4FBFf3a
 
 module.exports = {
   solidity: "0.8.16",
