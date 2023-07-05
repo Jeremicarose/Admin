@@ -148,6 +148,7 @@ contract Admin is
     }
 
         function getCommitBalance(uint256 commitId) public view returns (uint256) {
+             require(commitId < _commits.length, "No commits exist for that id");
         Commit memory commit = _commits[commitId];
         return commit.budget - commit.spent;
     }

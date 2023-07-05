@@ -162,30 +162,4 @@ describe("TestAdmin", () => {
 
     
   });
-
- describe("getCommitBalance", function () {
-  beforeEach(async function () {
-    const [owner, addr1] = await ethers.getSigners();
-    await this.admin.commitTree(addr1.address, 100, 1500, 100);
-  });
-
-  it("should return the correct commit balance", async function () {
-    const commitBalance = await this.admin.getCommitBalance(0);
-    expect(commitBalance).to.equal(100);
-  });
-
-  it("should return the correct commit balance after a payout", async function () {
-    const [owner, addr1] = await ethers.getSigners();
-
-    await this.stableToken.increaseAllowance(this.admin.address, 20);
-    await this.admin.approvePayout(0, 20, "", 100);
-
-    const commitBalance = await this.admin.getCommitBalance(0);
-    expect(commitBalance).to.equal(100 - 20);
-  });
-
- 
-});
-
-  
 });

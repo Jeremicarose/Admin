@@ -184,7 +184,11 @@ describe("TestAdmin", () => {
     expect(commitBalance).to.equal(100 - 20);
   });
 
- 
+  it("should revert if commitId does not exist", async function () {
+    await expect(this.admin.getCommitBalance(12)).to.be.revertedWith(
+      "No commits exist for that id"
+    );
+  });
 });
 
   

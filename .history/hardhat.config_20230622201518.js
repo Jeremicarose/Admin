@@ -29,16 +29,6 @@ module.exports = {
   etherscan: {
     apiKey: etherscanApiKey,
     url: "https://api.etherscan.io/api",
-    customChains: [
-      {
-        network: "alfajores",
-        chainId: 44787,
-        urls: {
-          apiURL: "https://api-testnet.celoexplorer.org/api",
-          browserURL: "https://testnet.celoexplorer.org",
-        },
-      },
-    ],
   },
   gasReporter: {
     currency: "USD",

@@ -40,10 +40,12 @@ contract Admin is
     IERC20Upgradeable private _stableToken;
     uint256 private constant MAX_PERCENTAGE = 10000;
     CountersUpgradeable.Counter private _commitIdTracker;
+    uint256 public commitsCount;
     mapping(uint256 => Commit) private _commits;
     mapping(address => uint256) private _userBalances;
 
     function initialize(address stableTokenAddress) external initializer {
+        commitsCount = 0;
         __Ownable_init();
         __ReentrancyGuard_init();
 
@@ -143,11 +145,14 @@ contract Admin is
         );
     }
 
-    function getUserBalance(address userAddress) external view returns (uint256) {
+    function getUserBalance(
+        address userAddress
+    ) external view returns (uint256) {
         return _userBalances[userAddress];
     }
 
-        function getCommitBalance(uint256 commitId) public view returns (uint256) {
+    function getCommitBalance(uint256 commitId) public view returns (uint256) {
+        require(commitId < commitsCount, "No commits exist for that id");
         Commit memory commit = _commits[commitId];
         return commit.budget - commit.spent;
     }

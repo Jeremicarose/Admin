@@ -9,6 +9,7 @@ describe("TestAdmin", () => {
       "MockStableToken"
     );
     this.AdminContract = await ethers.getContractFactory("Admin");
+    
   });
 
   beforeEach(async function () {
@@ -163,29 +164,33 @@ describe("TestAdmin", () => {
     
   });
 
- describe("getCommitBalance", function () {
-  beforeEach(async function () {
-    const [owner, addr1] = await ethers.getSigners();
-    await this.admin.commitTree(addr1.address, 100, 1500, 100);
+  describe("getCommitBalance", function () {
+    beforeEach(async function () {
+      const [owner, addr1] = await ethers.getSigners();
+      await this.admin.commitTree(addr1.address, 100, 1500, 100);
+    });
+  
+    it("should return the correct commit balance", async function () {
+      const commitBalance = await this.admin.getCommitBalance(0);
+      expect(commitBalance).to.equal(100);
+    });
+  
+    it("should return the correct commit balance after a payout", async function () {
+      const [owner, addr1] = await ethers.getSigners();
+  
+      await this.stableToken.increaseAllowance(this.admin.address, 20);
+      await this.admin.approvePayout(0, 20, "", 100);
+  
+      const commitBalance = await this.admin.getCommitBalance(0);
+      expect(commitBalance).to.equal(100 - 20);
+    });
+  
+    it("should revert if commitId does not exist", async function () {
+      await expect(this.admin.getCommitBalance(12)).to.be.revertedWith(
+        "No commits exist for that id"
+      );
+    });
   });
-
-  it("should return the correct commit balance", async function () {
-    const commitBalance = await this.admin.getCommitBalance(0);
-    expect(commitBalance).to.equal(100);
-  });
-
-  it("should return the correct commit balance after a payout", async function () {
-    const [owner, addr1] = await ethers.getSigners();
-
-    await this.stableToken.increaseAllowance(this.admin.address, 20);
-    await this.admin.approvePayout(0, 20, "", 100);
-
-    const commitBalance = await this.admin.getCommitBalance(0);
-    expect(commitBalance).to.equal(100 - 20);
-  });
-
- 
-});
-
+  
   
 });
