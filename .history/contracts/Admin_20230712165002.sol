@@ -146,4 +146,9 @@ contract Admin is
     function getUserBalance(address userAddress) external view returns (uint256) {
         return _userBalances[userAddress];
     }
+
+        function getCommitBalance(uint256 commitId) public view returns (uint256) {
+        Commit memory commit = _commits[commitId];
+        return commit.budget - commit.spent;
+    }
 }
