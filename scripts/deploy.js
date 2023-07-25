@@ -1,12 +1,27 @@
-const { TestAdmin } = require("/Admin Tree/contracts/Admin.sol"); 
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
-  const provider = new ethers.providers.HttpProvider("https://alfajores-faucet.celo-testnet.org");
-  const TestAdmin = await ethers.getContractFactory("TestAdmin");
-  const testAdmin = await TestAdmin.deploy(provider);
-  await testAdmin.deployed();
+   const gas = await ethers.provider.getGasPrice()
+   const AdminContract = await ethers.getContractFactory("Admin");
+   console.log("Deploying Admin contract...");
 
-  console.log("The address of the deployed contract is:", testAdmin.address);
+   // Add your stable token address here.
+   let stableTokenAddress = '0x874069fa1eb16d44d622f2e0ca25eea172369bc1';
+
+   const adminContract = await upgrades.deployProxy(AdminContract, [stableTokenAddress], {
+      gasPrice: gas, 
+      initializer: "initialize",
+   });
+   await adminContract.deployed();
+   console.log("Admin contract deployed to:", adminContract.address);
 }
 
-main().catch(console.error);
+main().catch((error) => {
+   console.error(error);
+   process.exitCode = 1;
+});
+
+
+
+
+
