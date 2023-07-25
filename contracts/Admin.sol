@@ -18,7 +18,6 @@ contract Admin is
         address payable owner;
         uint256 numberOfTrees;
         uint256 budget;
-        uint256 balance;
         uint256 spent;
     }
 
@@ -34,7 +33,6 @@ contract Admin is
         address indexed owner,
         uint256 indexed timestamp,
         bool isFronted,
-        uint256 balance,
         uint256 payoutAmount,
         string payoutMetadata
     );
@@ -43,6 +41,7 @@ contract Admin is
     uint256 private constant MAX_PERCENTAGE = 10000;
     CountersUpgradeable.Counter private _commitIdTracker;
     mapping(uint256 => Commit) private _commits;
+    mapping(address => uint256) private _userBalances;
 
     function initialize(address stableTokenAddress) external initializer {
         __Ownable_init();
@@ -70,12 +69,44 @@ contract Admin is
             owner: payable(owner),
             numberOfTrees: numberOfTrees,
             budget: budget,
-            balance: 0,
             spent: 0
         });
         _commitIdTracker.increment();
 
         emit CommitCreated(owner, timestamp, commitId, budget, numberOfTrees);
+    }
+
+    function frontPayoutWithoutTransfer(
+        uint256 commitId,
+        uint256 payoutAmount,
+        uint256 timestamp
+    ) external nonReentrant {
+        require(
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent < commit.budget, "Budget has been fully spent");
+
+        // Ensure that the payout amount doesn't exceed the remaining budget
+        uint256 remainingBudget = commit.budget - commit.spent;
+        uint256 actualPayoutAmount = payoutAmount;
+        if (actualPayoutAmount > remainingBudget) {
+            actualPayoutAmount = remainingBudget;
+        }
+
+        // Update the spent amount
+        commit.spent += actualPayoutAmount;
+
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+            timestamp,
+            true,
+            actualPayoutAmount,
+            ""
+        );
     }
 
     function frontPayout(
@@ -89,24 +120,35 @@ contract Admin is
         );
 
         Commit storage commit = _commits[commitId];
-        require(commit.spent <= commit.budget, "Budget has been fully spent");
+        require(commit.spent < commit.budget, "Budget has been fully spent");
 
-        commit.spent += payoutAmount;
-        require(commit.spent <= commit.budget, "Payout will exceed the budget");
+        // Ensure that the payout amount doesn't exceed the remaining budget
+        uint256 remainingBudget = commit.budget - commit.spent;
+        uint256 actualPayoutAmount = payoutAmount;
+        if (actualPayoutAmount > remainingBudget) {
+            actualPayoutAmount = remainingBudget;
+        }
 
-        commit.balance += payoutAmount;
-        require(
-            _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
-            "Transfer failed"
-        );
+        commit.spent += actualPayoutAmount;
+
+        // Perform the transfer only if the actual payout amount is greater than zero
+        if (actualPayoutAmount > 0) {
+            require(
+                _stableToken.transferFrom(
+                    msg.sender,
+                    commit.owner,
+                    actualPayoutAmount
+                ),
+                "Transfer failed"
+            );
+        }
 
         emit PayoutSent(
             commitId,
             commit.owner,
             timestamp,
             true,
-            commit.balance,
-            payoutAmount,
+            actualPayoutAmount,
             ""
         );
     }
@@ -123,26 +165,47 @@ contract Admin is
         );
 
         Commit storage commit = _commits[commitId];
-        require(commit.spent <= commit.budget, "Budget has been fully spent");
+        require(commit.spent < commit.budget, "Budget has been fully spent");
 
-        commit.spent += payoutAmount;
-        require(commit.spent <= commit.budget, "Payout will exceed the budget");
+        // Ensure that the payout amount doesn't exceed the remaining budget
+        uint256 remainingBudget = commit.budget - commit.spent;
+        uint256 actualPayoutAmount = payoutAmount;
+        if (actualPayoutAmount > remainingBudget) {
+            actualPayoutAmount = remainingBudget;
+        }
 
-        commit.balance += payoutAmount;
+        commit.spent += actualPayoutAmount;
 
-        require(
-            _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
-            "Transfer failed"
-        );
+        // Perform the transfer only if the actual payout amount is greater than zero
+        if (actualPayoutAmount > 0) {
+            require(
+                _stableToken.transferFrom(
+                    msg.sender,
+                    commit.owner,
+                    actualPayoutAmount
+                ),
+                "Transfer failed"
+            );
+        }
 
         emit PayoutSent(
             commitId,
             commit.owner,
             timestamp,
             false,
-            commit.balance,
-            payoutAmount,
+            actualPayoutAmount,
             payoutMetadata
         );
+    }
+
+    function getUserBalance(
+        address userAddress
+    ) external view returns (uint256) {
+        return _userBalances[userAddress];
+    }
+
+    function getCommitBalance(uint256 commitId) public view returns (uint256) {
+        Commit memory commit = _commits[commitId];
+        return commit.budget - commit.spent;
     }
 }
