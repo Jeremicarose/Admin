@@ -1,16 +1,3 @@
-// async function main() {
-//   // Deploying the smart contract
-//   const MyContract = await ethers.getContractFactory("Admin");
-//   const myContract = await MyContract.deploy();
-
-//   // Waiting for the contract to be deployed
-//   await myContract.deployed();
-
-//   console.log("MyContract deployed to:", myContract.address);
-
-
-// }
-
 const { ethers, upgrades } = require("hardhat");
 
 async function main() {
@@ -19,7 +6,7 @@ async function main() {
    console.log("Deploying Admin contract...");
 
    // Add your stable token address here.
-   let stableTokenAddress = '0x765de816845861e75a25fca122bb6898b8b1282a';
+   let stableTokenAddress = '0x874069fa1eb16d44d622f2e0ca25eea172369bc1';
 
    const adminContract = await upgrades.deployProxy(AdminContract, [stableTokenAddress], {
       gasPrice: gas, 
@@ -33,14 +20,3 @@ main().catch((error) => {
    console.error(error);
    process.exitCode = 1;
 });
-
-
-
-
-// Running the deployment script
-// main()
-//   .then(() => process.exit(0))
-//   .catch((error) => {
-//     console.error(error);
-//     process.exit(1);
-//   }); 

@@ -92,7 +92,7 @@ describe("Admin Contract", function () {
 
   describe("Step 2: Check the frontPayout function", function () {
     it("Point a) should throw an error if the commit with the given commitId does not exist", async function () {
-      const commitId = 6;
+      const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("10");
       const timestamp = Math.floor(Date.now() / 1000);
 
