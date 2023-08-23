@@ -14,7 +14,7 @@ const CELO_RPC_URL = process.env.CELO_RPC_URL;
  */
 module.exports = {
   solidity: {
-    version: "0.8.2",
+    version: "0.8.1",
     settings: {
       optimizer: {
         enabled: true,

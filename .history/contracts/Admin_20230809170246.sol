@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT Licensed
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -76,107 +76,78 @@ contract Admin is
         emit CommitCreated(owner, timestamp, commitId, budget, numberOfTrees);
     }
 
-   function frontPayout(
-    uint256 commitId,
-    uint256 payoutAmount,
-    uint256 timestamp
-) external nonReentrant {
-    require(
-        _commits[commitId].owner != address(0),
-        "No commits exist for that id"
-    );
-
-    Commit storage commit = _commits[commitId];
-    require(commit.spent < commit.budget, "Budget has been fully spent");
-
-    // Ensure that payout amount doesn't exceed the remaining budget
-    uint256 remainingBudget = commit.budget - commit.spent;
-    uint256 actualPayoutAmount = payoutAmount;
-    if (actualPayoutAmount > remainingBudget) {
-        actualPayoutAmount = remainingBudget;
-    }
-
-    // Subtract the payout from user balance
-    _userBalances[commit.owner] -= actualPayoutAmount;
-
-    commit.spent += actualPayoutAmount;
-
-    // Perform the transfer only if the actual payout amount is greater than zero
-    if (actualPayoutAmount > 0) {
+    function frontPayout(
+        uint256 commitId,
+        uint256 payoutAmount,
+        uint256 timestamp
+    ) external nonReentrant {
         require(
-            _stableToken.transferFrom(
-                msg.sender,
-                commit.owner,
-                actualPayoutAmount
-            ),
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent <= commit.budget, "Budget has been fully spent");
+
+        commit.spent += payoutAmount;
+        require(commit.spent <= commit.budget, "Payout will exceed the budget");
+
+        _userBalances[commit.owner] += payoutAmount;
+
+        require(
+            _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
             "Transfer failed"
+        );
+
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+            timestamp,
+            true,
+            payoutAmount,
+            ""
         );
     }
 
-    emit PayoutSent(
-        commitId,
-        commit.owner,
-        timestamp,
-        true,
-        actualPayoutAmount,
-        ""
-    );
-}
-
-function approvePayout(
-    uint256 commitId,
-    uint256 payoutAmount,
-    string calldata payoutMetadata,
-    uint256 timestamp
-) external nonReentrant {
-    require(
-        _commits[commitId].owner != address(0),
-        "No commits exist for that id"
-    );
-
-    Commit storage commit = _commits[commitId];
-    require(commit.spent < commit.budget, "Budget has been fully spent");
-
-    // Ensure that payout amount doesn't exceed the remaining budget
-    uint256 remainingBudget = commit.budget - commit.spent;
-    uint256 actualPayoutAmount = payoutAmount;
-    if (actualPayoutAmount > remainingBudget) {
-        actualPayoutAmount = remainingBudget;
-    }
-
-    // Add the payout to user balance
-    _userBalances[commit.owner] += actualPayoutAmount;
-
-    commit.spent += actualPayoutAmount;
-
-    // Perform the transfer only if the actual payout amount is greater than zero
-    // and user balance is not negative
-    if (actualPayoutAmount > 0 && _userBalances[commit.owner] >= 0) {
+    function approvePayout(
+        uint256 commitId,
+        uint256 payoutAmount,
+        string calldata payoutMetadata,
+        uint256 timestamp
+    ) external nonReentrant {
         require(
-            _stableToken.transferFrom(
-                msg.sender,
-                commit.owner,
-                actualPayoutAmount
-            ),
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent <= commit.budget, "Budget has been fully spent");
+
+        commit.spent += payoutAmount;
+        require(commit.spent <= commit.budget, "Payout will exceed the budget");
+
+        _userBalances[commit.owner] += payoutAmount;
+
+        require(
+            _stableToken.transferFrom(msg.sender, commit.owner, payoutAmount),
             "Transfer failed"
         );
-    }
 
-    emit PayoutSent(
-        commitId,
-        commit.owner,
-        timestamp,
-        false,
-        actualPayoutAmount,
-        payoutMetadata
-    );
-}
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+            timestamp,
+            false,
+            payoutAmount,
+            payoutMetadata
+        );
+    }
 
     function getUserBalance(address userAddress) external view returns (uint256) {
         return _userBalances[userAddress];
     }
 
-    function getCommitBalance(uint256 commitId) public view returns (uint256) {
+        function getCommitBalance(uint256 commitId) public view returns (uint256) {
         Commit memory commit = _commits[commitId];
         return commit.budget - commit.spent;
     }

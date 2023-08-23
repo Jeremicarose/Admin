@@ -1,20 +1,14 @@
-
-require("dotenv").config({ path: ".env" });
-require("@nomiclabs/hardhat-truffle5");
+require('@nomiclabs/hardhat-truffle5');
 require("@nomiclabs/hardhat-waffle");
-require("@openzeppelin/hardhat-upgrades");
-require("hardhat-gas-reporter");
 require('hardhat-deploy');
-
-const CELO_RPC_URL = process.env.CELO_RPC_URL;
-
+require("hardhat-gas-reporter");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
   solidity: {
-    version: "0.8.2",
+    version: "0.8.1",
     settings: {
       optimizer: {
         enabled: true,
@@ -35,7 +29,7 @@ module.exports = {
     },
     alfajores: {
       url: "https://alfajores-forno.celo-testnet.org",
-      accounts: ["51316d1b99a418519259f85a5c124747414025bfa92e8defae4a8925a1cff1c3"],  // enter private key of the one that will deploy the contract to testnet
+      accounts: [""],  // enter private key of the one that will deploy the contract to testnet
       //chainId: 44787
     }
   },

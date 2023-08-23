@@ -32,6 +32,7 @@
     "ethers": "^5.7.2",
     "etherscan-api": "^10.3.0",
     "hardhat": "^2.9.1",
+    "hardhat-deploy": "^0.11.34",
     "hardhat-gas-reporter": "^1.0.4",
     "solhint": "^3.3.6"
   }

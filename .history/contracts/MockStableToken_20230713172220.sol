@@ -1,6 +1,6 @@
 // contracts/MockStableToken.sol
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 

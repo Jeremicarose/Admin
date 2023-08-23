@@ -7,6 +7,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
      log: true,
    });
  };
- console.log("Deploying Admin contract");
- console.log("Deployed Admin contract" + Admin.address);
  module.exports.tags = ['Admin'];

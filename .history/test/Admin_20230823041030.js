@@ -13,7 +13,7 @@ describe("Admin Contract", function () {
     admin = await Admin.deploy();
     await admin.deployed();
 
-    const StableToken = await ethers.getContractFactory("MockStableToken");
+    const StableToken = await ethers.getContractFactory("StableToken");
     stableToken = await StableToken.deploy();
     await stableToken.deployed();
 
@@ -83,9 +83,8 @@ describe("Admin Contract", function () {
     it("Point a) should throw an error if the commit with the given commitId does not exist", async function () {
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("10");
-      const timestamp = Math.floor(Date.now() / 1000);
 
-      await expect(admin.connect(user1).frontPayout(commitId, payoutAmount,timestamp  )).to.be.revertedWith("Commit does not exist");
+      await expect(admin.connect(user1).frontPayout(commitId, payoutAmount)).to.be.revertedWith("Commit does not exist");
     });
 
     it("Point a) should throw an error if the budget for the commit has been fully spent", async function () {
@@ -98,7 +97,7 @@ describe("Admin Contract", function () {
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("110");
 
-      await expect(admin.connect(user1).frontPayout(commitId, payoutAmount,timestamp )).to.be.revertedWith("Insufficient budget");
+      await expect(admin.connect(user1).frontPayout(commitId, payoutAmount)).to.be.revertedWith("Insufficient budget");
     });
 
     it("Point b) should correctly calculate the actualPayoutAmount based on the remaining budget", async function () {
@@ -111,65 +110,8 @@ describe("Admin Contract", function () {
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("50");
 
-      await admin.connect(user1).frontPayout(commitId, payoutAmount, timestamp );
+      await admin.connect(user1).frontPayout(commitId, payoutAmount);
 
       const remainingBudget = await admin.getCommitBalance(commitId);
       expect(remainingBudget).to.equal(budget.sub(payoutAmount));
     });
-  });
-
-    describe("Step 3: Check the approvePayout function", function () {
-      it("Point a) should throw an error if the commit with the given commitId does not exist", async function () {
-        const commitId = 0;
-        const payoutAmount = ethers.utils.parseEther("10");
-  
-        await expect(admin.connect(user1).approvePayout(commitId, payoutAmount)).to.be.revertedWith("Commit does not exist");
-      });
-  
-      it("Point a) should throw an error if the budget for the commit has been fully spent", async function () {
-        const budget = ethers.utils.parseEther("100");
-        const numberOfTrees = 5;
-        const timestamp = Math.floor(Date.now() / 1000);
-  
-        await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
-  
-        const commitId = 0;
-        const payoutAmount = ethers.utils.parseEther("110");
-  
-        await expect(admin.connect(user1).approvePayout(commitId, payoutAmount)).to.be.revertedWith("Insufficient budget");
-      });
-  
-      it("Point b) should correctly calculate the actualPayoutAmount based on the remaining budget", async function () {
-        const budget = ethers.utils.parseEther("100");
-        const numberOfTrees = 5;
-        const timestamp = Math.floor(Date.now() / 1000);
-  
-        await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
-  
-        const commitId = 0;
-        const payoutAmount = ethers.utils.parseEther("50");
-  
-        await admin.connect(user1).approvePayout(commitId, payoutAmount);
-  
-        const remainingBudget = await admin.getCommitBalance(commitId);
-        expect(remainingBudget).to.equal(budget.sub(payoutAmount));
-      });
-    });
-  
-    describe("Step 4: Check the getUserBalance function", function () {
-      it("Point a) should return the balance of a user based on their address", async function () {
-        const budget = ethers.utils.parseEther("100");
-        const numberOfTrees = 5;
-        const timestamp = Math.floor(Date.now() / 1000);
-  
-        await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
-  
-        const userBalance = await admin.getUserBalance(user1.address);
-        expect(userBalance).to.equal(budget);
-      });
-    });
-  
-    // Rest of the test cases for Step 5 and beyond...
-  
-});
-  
