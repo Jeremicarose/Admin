@@ -170,7 +170,7 @@ function approvePayout(
 }
 
 
-    function getUserDebt(address userAddress) external view returns (uint256) {
+    function getUserBalance(address userAddress) external view returns (uint256) {
         return _userDebt[userAddress];
     }
 

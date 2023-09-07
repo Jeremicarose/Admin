@@ -136,19 +136,21 @@ function approvePayout(
     Commit storage commit = _commits[commitId];
     require(commit.spent < commit.budget, "Budget has been fully spent");
 
+    // Ensure that payout amount doesn't exceed the remaining budget
     uint256 remainingBudget = commit.budget - commit.spent;
     uint256 actualPayoutAmount = payoutAmount;
     if (actualPayoutAmount > remainingBudget) {
         actualPayoutAmount = remainingBudget;
     }
 
-    require(_userDebt[commit.owner] >= actualPayoutAmount, "Insufficient balance");
-
-    _userDebt[commit.owner] -= actualPayoutAmount;
+    // Add the payout to user balance
+    _userBalances[commit.owner] += actualPayoutAmount;
 
     commit.spent += actualPayoutAmount;
 
-    if (actualPayoutAmount > 0 && _userDebt[commit.owner] >= 0) {
+    // Perform the transfer only if the actual payout amount is greater than zero
+    // and user balance is not negative
+    if (actualPayoutAmount > 0 && _userBalances[commit.owner] >= 0) {
         require(
             _stableToken.transferFrom(
                 msg.sender,
@@ -169,9 +171,8 @@ function approvePayout(
     );
 }
 
-
-    function getUserDebt(address userAddress) external view returns (uint256) {
-        return _userDebt[userAddress];
+    function getUserBalance(address userAddress) external view returns (uint256) {
+        return _userBalances[userAddress];
     }
 
     function getCommitBalance(uint256 commitId) public view returns (uint256) {

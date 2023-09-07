@@ -109,12 +109,8 @@ describe("Admin Contract", function () {
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("110");
 
-      // Spend the budget to ensure it's fully spent
-      await admin.connect(user1).frontPayout(commitId, budget, timestamp);
-
       await expect(admin.connect(user1).frontPayout(commitId, payoutAmount, timestamp)).to.be.revertedWith("Budget has been fully spent");
-  });
-    
+    });
 
     it("should correctly calculate the actualPayoutAmount based on the remaining budget and add it to the user's debt", async function () {
       const budget = ethers.utils.parseEther("100");
@@ -142,62 +138,72 @@ describe("Admin Contract", function () {
 
 
   describe("Step 3: Check the approvePayout function", function () {
-    it("should throw an error if the commit with the given commitId does not exist", async function () {
+    it("Point a) should throw an error if the commit with the given commitId does not exist", async function () {
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("10");
       const payoutMetadata = "Test metadata";
       const timestamp = Math.floor(Date.now() / 1000);
   
-      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("No commits exist for that id");
+      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Commit does not exist");
     });
   
-    it("should throw an error if the user's debt is less than the payout amount", async function () {
-      const budget = ethers.utils.parseEther("100");
-      const numberOfTrees = 5;
-      const timestamp = Math.floor(Date.now() / 1000);
+      it("Point a) should throw an error if the budget for the commit has been fully spent", async function () {
+        const budget = ethers.utils.parseEther("100");
+        const numberOfTrees = 5;
+        const timestamp = Math.floor(Date.now() / 1000);
   
-      await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
+        await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
   
-      const commitId = 0;
-      const payoutAmount = ethers.utils.parseEther("110");
-      const payoutMetadata = "Test metadata";
+        const commitId = 0;
+        const payoutAmount = ethers.utils.parseEther("110");
   
-      // Set the user's debt to be less than the payout amount
-      const frontPayoutAmount = ethers.utils.parseEther("45");
-      await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
+        await expect(admin.connect(user1).approvePayout(commitId, payoutAmount)).to.be.revertedWith("Insufficient budget");
+      });
   
-      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Insufficient balance");
-  });
+      it("Point b) should correctly calculate the actualPayoutAmount based on the remaining budget", async function () {
+        const budget = ethers.utils.parseEther("100");
+        const numberOfTrees = 5;
+        const timestamp = Math.floor(Date.now() / 1000);
   
+        await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
   
+        const commitId = 0;
+        const payoutAmount = ethers.utils.parseEther("50");
+  
+        await admin.connect(user1).approvePayout(commitId, payoutAmount);
+  
+        const remainingBudget = await admin.getCommitBalance(commitId);
+        expect(remainingBudget).to.equal(budget.sub(payoutAmount));
+      });
+    });
+  
+    describe("Step 3: Check the approvePayout function", function () {
+      it("Point a) should throw an error if the commit with the given commitId does not exist", async function () {
+        const commitId = 0;
+        const payoutAmount = ethers.utils.parseEther("10");
+        const payoutMetadata = "Test metadata";
+        const timestamp = Math.floor(Date.now() / 1000);
     
+        await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Commit does not exist");
+      });
   
-    it("should correctly calculate the actualPayoutAmount based on the user's debt and subtract it from the user's debt", async function () {
-      const budget = ethers.utils.parseEther("100");
-      const numberOfTrees = 5;
-      const timestamp = Math.floor(Date.now() / 1000);
+      it("should return the balance of a user based on their address", async function () {
+        const budget = ethers.utils.parseEther("100");
+        const numberOfTrees = 5;
+        const timestamp = Math.floor(Date.now() / 1000);
   
-      await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
+        await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
   
-      const commitId = 0;
-      const payoutAmount = ethers.utils.parseEther("50");
-      const payoutMetadata = "Test metadata";
+        // Calling frontPayout will affect the user's balance
+        const commitId = 0;
+        const payoutAmount = ethers.utils.parseEther("50");
+        await admin.connect(user1).frontPayout(commitId, payoutAmount, timestamp);
   
-      // Call frontPayout to add to the user's debt
-      await admin.connect(user1).frontPayout(commitId, payoutAmount, timestamp);
-  
-      // Check user debt before approvePayout
-      const initialDebt = await admin.getUserDebt(user1.address);
-  
-      await admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp);
-  
-      // Check user debt after approvePayout
-      const finalDebt = await admin.getUserDebt(user1.address);
-      expect(finalDebt).to.equal(initialDebt.sub(payoutAmount));
+        const userBalance = await admin.getUserBalance(user1.address);
+        // Expecting the balance to be negative now
+        expect(userBalance).to.be.equal("-"+payoutAmount);
+      });
     });
-});
-
-
   
   
 });

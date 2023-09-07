@@ -103,17 +103,17 @@ describe("Admin Contract", function () {
       const budget = ethers.utils.parseEther("100");
       const numberOfTrees = 5;
       const timestamp = Math.floor(Date.now() / 1000);
-
+    
       await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
-
+    
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("110");
-
-      // Spend the budget to ensure it's fully spent
-      await admin.connect(user1).frontPayout(commitId, budget, timestamp);
-
+    
+      // Make sure the budget is fully spent before calling frontPayout
+      await admin.connect(owner).spendBudget(commitId, budget);
+    
       await expect(admin.connect(user1).frontPayout(commitId, payoutAmount, timestamp)).to.be.revertedWith("Budget has been fully spent");
-  });
+    });
     
 
     it("should correctly calculate the actualPayoutAmount based on the remaining budget and add it to the user's debt", async function () {
@@ -162,15 +162,8 @@ describe("Admin Contract", function () {
       const payoutAmount = ethers.utils.parseEther("110");
       const payoutMetadata = "Test metadata";
   
-      // Set the user's debt to be less than the payout amount
-      const frontPayoutAmount = ethers.utils.parseEther("45");
-      await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
-  
-      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Insufficient balance");
-  });
-  
-  
-    
+      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Insufficient debt");
+    });
   
     it("should correctly calculate the actualPayoutAmount based on the user's debt and subtract it from the user's debt", async function () {
       const budget = ethers.utils.parseEther("100");

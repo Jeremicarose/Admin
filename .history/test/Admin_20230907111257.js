@@ -163,12 +163,11 @@ describe("Admin Contract", function () {
       const payoutMetadata = "Test metadata";
   
       // Set the user's debt to be less than the payout amount
-      const frontPayoutAmount = ethers.utils.parseEther("45");
+      const frontPayoutAmount = ethers.utils.parseEther("50");
       await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
   
       await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Insufficient balance");
   });
-  
   
     
   

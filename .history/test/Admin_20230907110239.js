@@ -155,21 +155,18 @@ describe("Admin Contract", function () {
       const budget = ethers.utils.parseEther("100");
       const numberOfTrees = 5;
       const timestamp = Math.floor(Date.now() / 1000);
-  
+    
       await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
-  
+    
       const commitId = 0;
       const payoutAmount = ethers.utils.parseEther("110");
       const payoutMetadata = "Test metadata";
-  
-      // Set the user's debt to be less than the payout amount
-      const frontPayoutAmount = ethers.utils.parseEther("45");
-      await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
-  
-      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Insufficient balance");
-  });
-  
-  
+    
+      // Make sure the user's debt is less than the payout amount before calling approvePayout
+      await admin.connect(owner).setUserDebt(user1.address, payoutAmount.sub(1));
+    
+      await expect(admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp)).to.be.revertedWith("Insufficient debt");
+    });
     
   
     it("should correctly calculate the actualPayoutAmount based on the user's debt and subtract it from the user's debt", async function () {
