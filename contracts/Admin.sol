@@ -102,14 +102,12 @@ contract Admin is
     commit.spent += actualPayoutAmount;
 
     if (actualPayoutAmount > 0) {
-        require(
-            _stableToken.transferFrom(
-                msg.sender,
-                commit.owner,
-                actualPayoutAmount
-            ),
-            "Transfer failed"
+        bool success = _stableToken.transferFrom(
+            msg.sender,
+            commit.owner,
+            actualPayoutAmount
         );
+        require(success, "Transfer failed");
     }
 
     emit PayoutSent(
@@ -121,6 +119,8 @@ contract Admin is
         ""
     );
 }
+
+
 
 function approvePayout(
     uint256 commitId,
@@ -142,10 +142,16 @@ function approvePayout(
         actualPayoutAmount = remainingBudget;
     }
 
-    require(_userDebt[commit.owner] >= actualPayoutAmount, "Insufficient balance");
+    uint256 userDebt = _userDebt[commit.owner];
+    if (actualPayoutAmount > userDebt) {
+        uint256 excessAmount = actualPayoutAmount - userDebt;
+        actualPayoutAmount = userDebt;
+        if (_stableToken.transferFrom(msg.sender, commit.owner, excessAmount)) {
+            emit PayoutSent(commitId, commit.owner, timestamp, false, excessAmount, payoutMetadata);
+        }
+    }
 
     _userDebt[commit.owner] -= actualPayoutAmount;
-
     commit.spent += actualPayoutAmount;
 
     if (actualPayoutAmount > 0 && _userDebt[commit.owner] >= 0) {
@@ -170,7 +176,7 @@ function approvePayout(
 }
 
 
-    function getUserDebt(address userAddress) external view returns (uint256) {
+    function getUserBalance(address userAddress) external view returns (uint256) {
         return _userDebt[userAddress];
     }
 
