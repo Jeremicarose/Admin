@@ -32,7 +32,6 @@ describe("Admin Contract", function () {
   });
 
   describe("Use Case: Create, FrontPayout, and ApprovePayout with Debt Handling", function () {
-    
     it("should create a commit with budget 50 and verify that debt increased after frontPayout", async function () {
       const budget = ethers.utils.parseEther("50");
       const numberOfTrees = 5;
@@ -44,49 +43,34 @@ describe("Admin Contract", function () {
       const frontPayoutAmount = ethers.utils.parseEther("20");
   
       // Check user debt before frontPayout
-      const initialDebt = await admin.getUserDebt(user1.address);
+      const initialDebt = await admin.getUserBalance(user1.address);
   
       await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
   
       // Check user debt after frontPayout
-      const finalDebt = await admin.getUserDebt(user1.address);
+      const finalDebt = await admin.getUserBalance(user1.address);
       expect(finalDebt).to.equal(initialDebt.add(frontPayoutAmount));
     });
   
     it("should approve a payout of 15, verify that debt decreased, and no cUSD has been sent", async function () {
-      const budget = ethers.utils.parseEther("50");
-      const numberOfTrees = 5;
-      const timestamp = Math.floor(Date.now() / 1000);
-    
-      await admin.connect(owner).commitTree(user1.address, budget, numberOfTrees, timestamp);
-    
       const commitId = 0;
-      const frontPayoutAmount = ethers.utils.parseEther("20");
-    
-      // Check user debt before frontPayout
-      const initialDebt = await admin.getUserDebt(user1.address);
-    
-      await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
-    
-      // Check user debt after frontPayout
-      const finalDebt = await admin.getUserDebt(user1.address);
-      expect(finalDebt).to.equal(initialDebt.add(frontPayoutAmount));
-    
       const payoutAmount = ethers.utils.parseEther("15");
       const payoutMetadata = "Test metadata";
-    
-      // Call the approvePayout function after creating a commit
+      const timestamp = Math.floor(Date.now() / 1000);
+  
+      // Check user debt before approvePayout
+      const initialDebt = await admin.getUserBalance(user1.address);
+  
       await admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp);
-    
+  
       // Check user debt after approvePayout
-      const finalDebtAfterPayout = await admin.getUserDebt(user1.address);
-      expect(finalDebtAfterPayout).to.equal(initialDebt.add(frontPayoutAmount).sub(payoutAmount));
-    
+      const finalDebt = await admin.getUserBalance(user1.address);
+      expect(finalDebt).to.equal(initialDebt.sub(payoutAmount));
+  
       // Check that no cUSD transfer happened
       const userBalanceAfterPayout = await stableToken.balanceOf(user1.address);
       expect(userBalanceAfterPayout).to.equal(ethers.utils.parseEther("1000"));
     });
-    
   
     it("should approve a payout of 10, verify that debt has zeroed, and a cUSD transfer happened (value should not be 10)", async function () {
       const commitId = 0;
@@ -95,12 +79,12 @@ describe("Admin Contract", function () {
       const timestamp = Math.floor(Date.now() / 1000);
   
       // Check user debt before approvePayout
-      const initialDebt = await admin.getUserDebt(user1.address);
+      const initialDebt = await admin.getUserBalance(user1.address);
   
       await admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp);
   
       // Check user debt after approvePayout
-      const finalDebt = await admin.getUserDebt(user1.address);
+      const finalDebt = await admin.getUserBalance(user1.address);
       expect(finalDebt).to.equal(ethers.utils.parseEther("0"));
   
       // Check that a cUSD transfer happened, and the value is not 10
@@ -115,12 +99,12 @@ describe("Admin Contract", function () {
       const timestamp = Math.floor(Date.now() / 1000);
   
       // Check user debt before approvePayout
-      const initialDebt = await admin.getUserDebt(user1.address);
+      const initialDebt = await admin.getUserBalance(user1.address);
   
       await admin.connect(user1).approvePayout(commitId, payoutAmount, payoutMetadata, timestamp);
   
       // Check user debt after approvePayout
-      const finalDebt = await admin.getUserDebt(user1.address);
+      const finalDebt = await admin.getUserBalance(user1.address);
       expect(finalDebt).to.equal(ethers.utils.parseEther("0"));
   
       // Check that a cUSD transfer happened, and the value is 10

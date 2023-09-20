@@ -146,22 +146,15 @@ function approvePayout(
     if (actualPayoutAmount > userDebt) {
         uint256 excessAmount = actualPayoutAmount - userDebt;
         actualPayoutAmount = userDebt;
-        emit PayoutSent(commitId, commit.owner, timestamp, false, excessAmount, payoutMetadata);
+        if (_stableToken.transferFrom(msg.sender, commit.owner, excessAmount)) {
+            emit PayoutSent(commitId, commit.owner, timestamp, false, excessAmount, payoutMetadata);
+        }
     }
 
     _userDebt[commit.owner] -= actualPayoutAmount;
     commit.spent += actualPayoutAmount;
 
-    if (actualPayoutAmount > 0) {
-        require(
-            _stableToken.transferFrom(
-                msg.sender,
-                commit.owner,
-                actualPayoutAmount
-            ),
-            "Transfer failed"
-        );
-    }
+   
 
     emit PayoutSent(
         commitId,
@@ -174,8 +167,7 @@ function approvePayout(
 }
 
 
-
-    function getUserDebt(address userAddress) external view returns (uint256) {
+    function getUserBalance(address userAddress) external view returns (uint256) {
         return _userDebt[userAddress];
     }
 

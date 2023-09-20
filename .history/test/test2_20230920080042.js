@@ -49,7 +49,7 @@ describe("Admin Contract", function () {
       await admin.connect(user1).frontPayout(commitId, frontPayoutAmount, timestamp);
   
       // Check user debt after frontPayout
-      const finalDebt = await admin.getUserDebt(user1.address);
+      const finalDebt = await admin.getUserBalance(user1.address);
       expect(finalDebt).to.equal(initialDebt.add(frontPayoutAmount));
     });
   
