@@ -38,14 +38,13 @@ contract Admin is
     );
 
     IERC20Upgradeable private _stableToken;
+    address private _stableTokenAddress;
     uint256 private constant MAX_PERCENTAGE = 10000;
     CountersUpgradeable.Counter private _commitIdTracker;
     mapping(uint256 => Commit) private _commits;
-    // mapping(address => uint256) private _userBalances;
     mapping(address => uint256) private _userDebt;
 
-
-    function initialize(address stableTokenAddress) external initializer {
+    function initialize(address stableTokenAddress) external initializer onlyOwner {
         __Ownable_init();
         __ReentrancyGuard_init();
 
@@ -54,6 +53,7 @@ contract Admin is
             "Zero address for stabletoken"
         );
         _stableToken = IERC20Upgradeable(stableTokenAddress);
+        _stableTokenAddress = stableTokenAddress;
     }
 
     function commitTree(
@@ -61,7 +61,7 @@ contract Admin is
         uint256 budget,
         uint256 numberOfTrees,
         uint256 timestamp
-    ) external nonReentrant {
+    ) external nonReentrant onlyOwner {
         require(owner != address(0), "Zero address for owner");
         require(budget > 0, "Budget must be greater than 0");
         require(numberOfTrees > 0, "Number of trees must be greater than 0");
@@ -78,97 +78,87 @@ contract Admin is
         emit CommitCreated(owner, timestamp, commitId, budget, numberOfTrees);
     }
 
-   function frontPayout(
-    uint256 commitId,
-    uint256 payoutAmount,
-    uint256 timestamp
-) external nonReentrant {
-    require(
-        _commits[commitId].owner != address(0),
-        "No commits exist for that id"
-    );
-
-    Commit storage commit = _commits[commitId];
-    require(commit.spent < commit.budget, "Budget has been fully spent");
-
-    uint256 remainingBudget = commit.budget - commit.spent;
-    uint256 actualPayoutAmount = payoutAmount;
-    if (actualPayoutAmount > remainingBudget) {
-        actualPayoutAmount = remainingBudget;
-    }
-
-    _userDebt[commit.owner] += actualPayoutAmount;
-
-    commit.spent += actualPayoutAmount;
-
-    if (actualPayoutAmount > 0) {
+    function frontPayout(
+        uint256 commitId,
+        uint256 payoutAmount,
+        uint256 timestamp
+    ) external nonReentrant onlyOwner {
         require(
-            _stableToken.transferFrom(
-                msg.sender,
-                commit.owner,
-                actualPayoutAmount
-            ),
-            "Transfer failed"
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent < commit.budget, "Budget has been fully spent");
+
+        uint256 remainingBudget = commit.budget - commit.spent;
+        uint256 actualPayoutAmount = payoutAmount;
+        if (actualPayoutAmount > remainingBudget) {
+            actualPayoutAmount = remainingBudget;
+        }
+
+        _userDebt[commit.owner] += actualPayoutAmount;
+        commit.spent += actualPayoutAmount;
+
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+            timestamp,
+            true,
+            actualPayoutAmount,
+            ""
         );
     }
 
-    emit PayoutSent(
-        commitId,
-        commit.owner,
-        timestamp,
-        true,
-        actualPayoutAmount,
-        ""
-    );
-}
-
-function approvePayout(
-    uint256 commitId,
-    uint256 payoutAmount,
-    string calldata payoutMetadata,
-    uint256 timestamp
-) external nonReentrant {
-    require(
-        _commits[commitId].owner != address(0),
-        "No commits exist for that id"
-    );
-
-    Commit storage commit = _commits[commitId];
-    require(commit.spent < commit.budget, "Budget has been fully spent");
-
-    uint256 remainingBudget = commit.budget - commit.spent;
-    uint256 actualPayoutAmount = payoutAmount;
-    if (actualPayoutAmount > remainingBudget) {
-        actualPayoutAmount = remainingBudget;
-    }
-
-    require(_userDebt[commit.owner] >= actualPayoutAmount, "Insufficient balance");
-
-    _userDebt[commit.owner] -= actualPayoutAmount;
-
-    commit.spent += actualPayoutAmount;
-
-    if (actualPayoutAmount > 0 && _userDebt[commit.owner] >= 0) {
+    function approvePayout(
+        uint256 commitId,
+        uint256 payoutAmount,
+        string calldata payoutMetadata,
+        uint256 timestamp
+    ) external nonReentrant onlyOwner {
         require(
-            _stableToken.transferFrom(
-                msg.sender,
-                commit.owner,
-                actualPayoutAmount
-            ),
-            "Transfer failed"
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent < commit.budget, "Budget has been fully spent");
+
+        uint256 remainingBudget = commit.budget - commit.spent;
+        uint256 actualPayoutAmount = payoutAmount;
+        if (actualPayoutAmount > remainingBudget) {
+            actualPayoutAmount = remainingBudget;
+        }
+
+        uint256 userDebt = _userDebt[commit.owner];
+        if (actualPayoutAmount > userDebt) {
+            uint256 excessAmount = actualPayoutAmount - userDebt;
+            _userDebt[commit.owner] = 0;
+            commit.spent += excessAmount;
+
+            if (excessAmount > 0) {
+                require(
+                    _stableToken.transferFrom(
+                        msg.sender,
+                        commit.owner,
+                        excessAmount
+                    ),
+                    "Transfer failed"
+                );
+            }
+        } else         {
+            _userDebt[commit.owner] -= actualPayoutAmount;
+        }
+
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+            timestamp,
+            false,
+            actualPayoutAmount,
+            payoutMetadata
         );
     }
-
-    emit PayoutSent(
-        commitId,
-        commit.owner,
-        timestamp,
-        false,
-        actualPayoutAmount,
-        payoutMetadata
-    );
-}
-
 
     function getUserDebt(address userAddress) external view returns (uint256) {
         return _userDebt[userAddress];
@@ -178,4 +168,11 @@ function approvePayout(
         Commit memory commit = _commits[commitId];
         return commit.budget - commit.spent;
     }
+
+    function getStableTokenAddress() external view returns (address) {
+        return _stableTokenAddress;
+    }
+
+   
 }
+

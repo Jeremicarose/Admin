@@ -41,7 +41,7 @@ contract Admin is
     address private _stableTokenAddress;
     uint256 private constant MAX_PERCENTAGE = 10000;
     CountersUpgradeable.Counter private _goalIdTracker;
-    mapping(uint256 => Goal) private _goals;
+    mapping(uint256 => goal) private _goals;
     mapping(address => uint256) private _userDebt;
 
     function initialize(address stableTokenAddress) external initializer onlyOwner {
@@ -67,7 +67,7 @@ contract Admin is
         require(numberOfTrees > 0, "Number of trees must be greater than 0");
 
         uint256 goalId = _goalIdTracker.current();
-        _goals[goalId] = Goal({
+        _goals[goalId] = goal({
             owner: payable(owner),
             numberOfTrees: numberOfTrees,
             budget: budget,
@@ -88,7 +88,7 @@ contract Admin is
             "No goals exist for that id"
         );
 
-        Goal storage goal = _goals[goalId];
+        goal storage goal = _goals[goalId];
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
@@ -120,7 +120,7 @@ contract Admin is
             "No goals exist for that id"
         );
 
-        Goal storage goal = _goals[goalId];
+        goal storage goal = _goals[goalId];
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
@@ -163,7 +163,7 @@ contract Admin is
             "No goals exist for that id"
         );
 
-        Goal storage goal = _goals[goalId];
+        goal storage goal = _goals[goalId];
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
@@ -207,7 +207,7 @@ contract Admin is
     }
 
     function getgoalBalance(uint256 goalId) public view returns (uint256) {
-        Goal memory goal = _goals[goalId];
+        goal memory goal = _goals[goalId];
         return goal.budget - goal.spent;
     }
 

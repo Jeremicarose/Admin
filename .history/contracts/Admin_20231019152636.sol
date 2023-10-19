@@ -88,7 +88,7 @@ contract Admin is
             "No goals exist for that id"
         );
 
-        Goal storage goal = _goals[goalId];
+        goal storage goal = _goals[goalId];
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
@@ -120,7 +120,7 @@ contract Admin is
             "No goals exist for that id"
         );
 
-        Goal storage goal = _goals[goalId];
+        goal storage goal = _goals[goalId];
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
@@ -163,7 +163,7 @@ contract Admin is
             "No goals exist for that id"
         );
 
-        Goal storage goal = _goals[goalId];
+        goal storage goal = _goals[goalId];
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
@@ -207,7 +207,7 @@ contract Admin is
     }
 
     function getgoalBalance(uint256 goalId) public view returns (uint256) {
-        Goal memory goal = _goals[goalId];
+        goal memory goal = _goals[goalId];
         return goal.budget - goal.spent;
     }
 
