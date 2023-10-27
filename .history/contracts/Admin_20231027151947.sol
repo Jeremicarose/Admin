@@ -182,12 +182,17 @@ contract Admin is
                 require(
                     _stableToken.transferFrom(
                         msg.sender,
+<<<<<<< HEAD
                         goal.owner,
+=======
+                        commit.owner,
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
                         excessAmount
                     ),
                     "Transfer failed"
                 );
             }
+<<<<<<< HEAD
         } else         {
             _userDebt[goal.owner] -= actualPayoutAmount;
         }
@@ -195,6 +200,15 @@ contract Admin is
         emit PayoutSent(
             goalId,
             goal.owner,
+=======
+        } else {
+            _userDebt[commit.owner] -= actualPayoutAmount;
+        }
+
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
             timestamp,
             false,
             actualPayoutAmount,
@@ -214,7 +228,10 @@ contract Admin is
     function getStableTokenAddress() external view returns (address) {
         return _stableTokenAddress;
     }
+<<<<<<< HEAD
 
    
+=======
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
 }
 
