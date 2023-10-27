@@ -4,21 +4,32 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "hardhat compile",
+    "devDeploy": "hardhat --network alfajores deploy",
+    "devVerify": "hardhat --network alfajores sourcify",
+    "prodVerify": "hardhat --network celo sourcify",
+    "test": "hardhat test"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+<<<<<<< HEAD
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "hardhat": "^2.17.3"
+=======
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "hardhat": "^2.14.0"
+>>>>>>> 3f438a317730443d2010b55bbe7580aa8f8630a0
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.3",
-    "@openzeppelin/contracts-upgradeable": "^4.8.3",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-truffle5": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@openzeppelin/contracts": "^4.8.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@openzeppelin/hardhat-upgrades": "^1.27.0",
     "@types/sinon-chai": "^3.2.3",
     "chai": "^4.3.7",
     "dotenv": "^16.0.3",

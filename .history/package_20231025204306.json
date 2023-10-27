@@ -14,7 +14,9 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "hardhat": "^2.14.0"
+>>>>>>> 3f438a317730443d2010b55bbe7580aa8f8630a0
   },
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -28,7 +30,11 @@
     "chai": "^4.3.7",
     "dotenv": "^16.0.3",
     "ethereum-waffle": "^3.0.0",
+    "ethers": "^5.7.2",
+    "etherscan-api": "^10.3.0",
     "hardhat": "^2.9.1",
+    "hardhat-deploy": "^0.11.34",
+>>>>>>> 3f438a317730443d2010b55bbe7580aa8f8630a0
     "hardhat-gas-reporter": "^1.0.4",
     "solhint": "^3.3.6"
   }
