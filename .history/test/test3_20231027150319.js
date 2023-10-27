@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
@@ -86,6 +88,7 @@ describe("Admin Contract", function () {
     });
   });
 });
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 

@@ -44,7 +44,11 @@ contract Admin is
     mapping(uint256 => Goal) private _goals;
     mapping(address => uint256) private _userDebt;
 
+<<<<<<< HEAD
     function initialize(address stableTokenAddress) external initializer onlyOwner {
+=======
+    function initialize(address stableTokenAddress) external initializer {
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
         __Ownable_init();
         __ReentrancyGuard_init();
 
@@ -73,6 +77,7 @@ contract Admin is
             budget: budget,
             spent: 0
         });
+<<<<<<< HEAD
         _goalIdTracker.increment();
 
         emit goalCreated(owner, timestamp, goalId, budget, numberOfTrees);
@@ -133,6 +138,36 @@ contract Admin is
 
         goal.spent += actualPayoutAmount;
 
+=======
+        _commitIdTracker.increment();
+
+        emit CommitCreated(owner, timestamp, commitId, budget, numberOfTrees);
+    }
+
+    function frontPayout(
+        uint256 commitId,
+        uint256 payoutAmount,
+        uint256 timestamp
+    ) external nonReentrant {
+        require(
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent < commit.budget, "Budget has been fully spent");
+
+        uint256 remainingBudget = commit.budget - commit.spent;
+        uint256 actualPayoutAmount = payoutAmount;
+        if (actualPayoutAmount > remainingBudget) {
+            actualPayoutAmount = remainingBudget;
+        }
+
+        _userDebt[commit.owner] += actualPayoutAmount;
+
+        commit.spent += actualPayoutAmount;
+
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
         if (actualPayoutAmount > 0) {
             bool success = _stableToken.transferFrom(
                 msg.sender,
@@ -143,8 +178,13 @@ contract Admin is
         }
 
         emit PayoutSent(
+<<<<<<< HEAD
             goalId,
             goal.owner,
+=======
+            commitId,
+            commit.owner,
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
             timestamp,
             true,
             actualPayoutAmount,
@@ -153,6 +193,7 @@ contract Admin is
     }
 
     function approvePayout(
+<<<<<<< HEAD
         uint256 goalId,
         uint256 payoutAmount,
         string calldata payoutMetadata,
@@ -167,27 +208,56 @@ contract Admin is
         require(goal.spent < goal.budget, "Budget has been fully spent");
 
         uint256 remainingBudget = goal.budget - goal.spent;
+=======
+        uint256 commitId,
+        uint256 payoutAmount,
+        string calldata payoutMetadata,
+        uint256 timestamp
+    ) external nonReentrant {
+        require(
+            _commits[commitId].owner != address(0),
+            "No commits exist for that id"
+        );
+
+        Commit storage commit = _commits[commitId];
+        require(commit.spent < commit.budget, "Budget has been fully spent");
+
+        uint256 remainingBudget = commit.budget - commit.spent;
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
         uint256 actualPayoutAmount = payoutAmount;
         if (actualPayoutAmount > remainingBudget) {
             actualPayoutAmount = remainingBudget;
         }
 
+<<<<<<< HEAD
         uint256 userDebt = _userDebt[goal.owner];
         if (actualPayoutAmount > userDebt) {
             uint256 excessAmount = actualPayoutAmount - userDebt;
             _userDebt[goal.owner] = 0;
             goal.spent += excessAmount;
+=======
+        uint256 userDebt = _userDebt[commit.owner];
+        if (actualPayoutAmount > userDebt) {
+            uint256 excessAmount = actualPayoutAmount - userDebt;
+            _userDebt[commit.owner] = 0;
+            commit.spent += excessAmount;
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
 
             if (excessAmount > 0) {
                 require(
                     _stableToken.transferFrom(
                         msg.sender,
+<<<<<<< HEAD
                         goal.owner,
+=======
+                        commit.owner,
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
                         excessAmount
                     ),
                     "Transfer failed"
                 );
             }
+<<<<<<< HEAD
         } else         {
             _userDebt[goal.owner] -= actualPayoutAmount;
         }
@@ -195,6 +265,15 @@ contract Admin is
         emit PayoutSent(
             goalId,
             goal.owner,
+=======
+        } else {
+            _userDebt[commit.owner] -= actualPayoutAmount;
+        }
+
+        emit PayoutSent(
+            commitId,
+            commit.owner,
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
             timestamp,
             false,
             actualPayoutAmount,
@@ -214,7 +293,10 @@ contract Admin is
     function getStableTokenAddress() external view returns (address) {
         return _stableTokenAddress;
     }
+<<<<<<< HEAD
 
    
+=======
+>>>>>>> e693a8b86a5ced2ac24b2b871b4f4be2cd381a07
 }
 

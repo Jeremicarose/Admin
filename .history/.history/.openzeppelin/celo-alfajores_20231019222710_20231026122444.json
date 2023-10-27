@@ -39,6 +39,14 @@
       "address": "0x4bAb86e31D797c9F6dFd9486C8220966ec47E625",
       "txHash": "0x2c2c91621217984a2181f6edb5835722a646fb5480f799f5d99535810478ced7",
       "kind": "transparent"
+<<<<<<< HEAD
+=======
+    },
+    {
+      "address": "0x88524489f8427Fab383ad8A34CDabA8B7D004198",
+      "txHash": "0x47130ab715d2b178fe2184c8e30a6227a134e44a2d7f97b7c999b284a458e326",
+      "kind": "transparent"
+>>>>>>> origin/master
     }
   ],
   "impls": {
