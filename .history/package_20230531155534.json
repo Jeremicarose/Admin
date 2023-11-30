@@ -1,0 +1,34 @@
+{
+  "name": "admin-tree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "hardhat compile",
+    "devDeploy": "hardhat --network alfajores deploy",
+    "devVerify": "hardhat --network alfajores sourcify",
+    "prodVerify": "hardhat --network celo sourcify",
+    "test": "hardhat test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "hardhat": "^2.14.0"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-truffle5": "^2.0.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@openzeppelin/contracts": "^4.8.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@types/sinon-chai": "^3.2.3",
+    "chai": "^4.3.7",
+    "dotenv": "^16.0.3",
+    "ethereum-waffle": "^3.0.0",
+    "hardhat": "^2.9.1",
+    "hardhat-gas-reporter": "^1.0.4",
+    "solhint": "^3.3.6"
+  }
+}
